@@ -21,10 +21,13 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 
@@ -125,6 +128,10 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
         extractDataUseCase.process(imageProxy,
             onSuccess = {
                 Log.i(TAG, "analyze: onSuccess: $it")
+                lifecycleScope.launch {
+                    delay(3_000)
+                    imageAnalysis!!.clearAnalyzer()
+                }
             }, onFailure = {
                 Log.e(TAG, "analyze: exception: ${it.message}")
             })
@@ -191,7 +198,7 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
         boxWidth = right - left
 
         //Changing the value of x in diameter/x will change the size of the box ; inversely proportionate to x
-        canvas.drawRect(0F, top.toFloat(),width.toFloat(), bottom.toFloat(), paint)
+        canvas.drawRect(0F, top.toFloat(), width.toFloat(), bottom.toFloat(), paint)
         holder.unlockCanvasAndPost(canvas)
     }
 

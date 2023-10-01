@@ -84,6 +84,13 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
         Log.i(TAG, "process: new bitmap width : ${newBitMap.width}")
         Log.i(TAG, "process: new bitmap height ; ${newBitMap.height}")
 
+        val pixel = newBitMap.getPixel((newBitMap.width / 2), 0 )
+        val red = Color.red(pixel)
+        val blue = Color.blue(pixel)
+        val green = Color.green(pixel)
+        val hexColor = String.format("#%02x%02x%02x", red, green, blue)
+        Log.d(TAG, "Color: ${hexColor}")
+
 
         val p = textRecognizer.process(
             InputImage.fromBitmap(
