@@ -3,6 +3,7 @@ package com.example.cardnumberocr.ui
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
 
 class CardNumberOcrActivity : ComponentActivity() {
@@ -11,6 +12,7 @@ class CardNumberOcrActivity : ComponentActivity() {
 
     private var _binding: ActivityCardNumberOcrBinding? = null
     private val binding get() = _binding!!
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate: ")
