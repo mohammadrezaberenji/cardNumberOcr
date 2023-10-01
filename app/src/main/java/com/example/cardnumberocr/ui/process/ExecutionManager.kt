@@ -1,5 +1,6 @@
 package com.example.cardnumberocr.ui.process
 
+import android.content.Context
 import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
@@ -12,11 +13,11 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.Executors
 
 @ExperimentalGetImage
-class ExecutionManager(private val imageAnalysis: ImageAnalysis?) {
+class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val context: Context) {
     private val TAG = "ExecutionManager"
 
     private val extractDataUseCase by lazy {
-        ExtractDataUseCase(TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS))
+        ExtractDataUseCase(TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS),context)
     }
     var latestCardDetail = CardDetail()
     var getLatestCardDetail: ((CardDetail) -> Unit)? =null

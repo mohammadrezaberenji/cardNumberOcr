@@ -89,7 +89,7 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
-            val executionManager = ExecutionManager(imageAnalysis)
+            val executionManager = ExecutionManager(imageAnalysis,this)
             executionManager.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
             }
