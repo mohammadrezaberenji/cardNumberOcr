@@ -12,16 +12,17 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.core.impl.CameraConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
+import com.example.cardnumberocr.ui.process.ExecutionManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
 @ExperimentalGetImage
@@ -35,11 +36,9 @@ class CardNumberOcrActivity : ComponentActivity() {
 
     private lateinit var mCameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private var camera: Camera? = null
-    private var imageAnalysis:ImageAnalysis?=null
+    private var imageAnalysis: ImageAnalysis? = null
 
-    private val extractDataUseCase by lazy {
-        ExtractDataUseCase(TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS))
-    }
+
 
     private var requestCameraPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -66,28 +65,38 @@ class CardNumberOcrActivity : ComponentActivity() {
 
         mCameraProviderFuture = ProcessCameraProvider.getInstance(this)
         mCameraProviderFuture.addListener({
-                val cameraSelector =
-                    CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                        .build()
-                val preview = Preview.Builder().build().apply {
-                    binding.preview.scaleType = PreviewView.ScaleType.FIT_CENTER
-                    setSurfaceProvider(binding.preview.surfaceProvider)
-                }
-                imageAnalysis = ImageAnalysis.Builder()
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
+            val cameraSelector =
+                CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                    .build()
+            val preview = Preview.Builder().build().apply {
+                binding.preview.scaleType = PreviewView.ScaleType.FIT_CENTER
+                setSurfaceProvider(binding.preview.surfaceProvider)
+            }
+            imageAnalysis = ImageAnalysis.Builder()
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
-                imageAnalysis?.setAnalyzer(Executors.newSingleThreadExecutor()) {
-                    analyze(it)
-                }
+            val executionManager = ExecutionManager(imageAnalysis)
+            executionManager.getLatestCardDetail = {
+                Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
+            }
 
-                if (camera != null) {
-                    Log.d(TAG, "initView: camera is null then going to unbind")
-                    cameraProviderFuture.get().unbindAll()
-                }
+//            imageAnalysis?.setAnalyzer(Executors.newSingleThreadExecutor()) {
+//                analyze(it)
+//            }
 
-                camera = cameraProviderFuture.get()
-                    .bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+            lifecycleScope.launch {
+                delay(6000)
+                executionManager.cancelAnalyzing()
+            }
+
+            if (camera != null) {
+                Log.d(TAG, "initView: camera is null then going to unbind")
+                cameraProviderFuture.get().unbindAll()
+            }
+
+            camera = cameraProviderFuture.get()
+                .bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -102,23 +111,6 @@ class CardNumberOcrActivity : ComponentActivity() {
             viewModel.permissionFlow.value
         } else requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
 
-    }
-
-    private fun analyze(imageProxy: ImageProxy?) {
-        Log.i(TAG, "analyze: ")
-        if (imageProxy == null) {
-            Log.e(TAG, "analyze: imageProxy is null")
-            return
-        }
-
-        extractDataUseCase.process(imageProxy,
-            onSuccess = {
-                Log.i(TAG, "analyze: onSuccess: $it")
-                val cardDetail = Extraction.invoke(it)
-                Log.i(TAG, "analyze: cardDetails: $cardDetail")
-            }, onFailure = {
-                Log.e(TAG, "analyze: exception: ${it.message}")
-            })
     }
 
     override fun onDestroy() {

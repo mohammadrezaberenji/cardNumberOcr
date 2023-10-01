@@ -6,6 +6,10 @@ import androidx.core.text.isDigitsOnly
 object Extraction {
     private const val TAG = "Extraction"
     var valueList = mutableListOf<String>()
+
+    private var cardNumber = ""
+    private var expire = ""
+    private var cvv2 = ""
     operator fun invoke(value: String): CardDetail? {
         if (value.isEmpty()) return null
         val list = value.split("\n").toMutableList()
@@ -14,9 +18,18 @@ object Extraction {
 
         val cardDetail = CardDetail()
 
-        cardDetail.expirationDate = extractExpirationDate()
-        cardDetail.cvv2 = extractCvv2()
-        cardDetail.cardNumber = extractNumbers()
+        val extractExpirationDate = extractExpirationDate()
+        val extractCvv2 = extractCvv2()
+        val extractNumbers = extractNumbers()
+
+        if (extractExpirationDate.isNotEmpty())
+            cardDetail.expirationDate = extractExpirationDate
+
+        if (extractCvv2.isNotEmpty())
+            cardDetail.cvv2 = extractCvv2
+
+        if (extractNumbers.isNotEmpty())
+            cardDetail.cardNumber = extractNumbers
 
         return cardDetail
     }
