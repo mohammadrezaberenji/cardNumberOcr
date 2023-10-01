@@ -1,25 +1,120 @@
 package com.example.cardnumberocr.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
+import androidx.camera.core.impl.CameraConfig
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.util.concurrent.Executors
 
+@ExperimentalGetImage
 class CardNumberOcrActivity : ComponentActivity() {
 
     private val TAG = CardNumberOcrActivity::class.java.simpleName
 
     private var _binding: ActivityCardNumberOcrBinding? = null
     private val binding get() = _binding!!
+    private val viewModel = CardNumberOcrVM()
 
+    private lateinit var mCameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private var camera: Camera? = null
+    private var imageAnalysis:ImageAnalysis?=null
+
+    private val extractDataUseCase by lazy {
+        ExtractDataUseCase(TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS))
+    }
+
+    private var requestCameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            viewModel.permissionFlow.value = isGranted
+            if (isGranted) {
+                Log.i(TAG, "requestCameraPermissionLauncher: user already have permission")
+            } else {
+                Log.i(TAG, "requestCameraPermissionLauncher: user does not have camera permission")
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate: ")
         super.onCreate(savedInstanceState)
         _binding = ActivityCardNumberOcrBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        checkCameraPermission()
+        prepareCameraConfig()
+    }
 
+    private fun prepareCameraConfig() {
+        Log.i(TAG, "prepareCameraConfig: ")
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+        mCameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        mCameraProviderFuture.addListener({
+                val cameraSelector =
+                    CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build()
+                val preview = Preview.Builder().build().apply {
+                    setSurfaceProvider(binding.preview.surfaceProvider)
+                }
+                imageAnalysis = ImageAnalysis.Builder()
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
+
+                imageAnalysis?.setAnalyzer(Executors.newSingleThreadExecutor()) {
+                    analyze(it)
+                }
+
+                if (camera != null) {
+                    Log.d(TAG, "initView: camera is null then going to unbind")
+                    cameraProviderFuture.get().unbindAll()
+                }
+
+                camera = cameraProviderFuture.get()
+                    .bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+
+    private fun checkCameraPermission(/*execute: () -> Unit*/) {
+        val havePermission = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        viewModel.permissionFlow.value = havePermission
+        Log.i(TAG, "checkCameraPermission: havePermission: $havePermission")
+        if (havePermission) {
+            viewModel.permissionFlow.value
+        } else requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+
+    }
+
+    private fun analyze(imageProxy: ImageProxy?) {
+        Log.i(TAG, "analyze: ")
+        if (imageProxy == null) {
+            Log.e(TAG, "analyze: imageProxy is null")
+            return
+        }
+
+        extractDataUseCase.process(imageProxy,
+            onSuccess = {
+                Log.i(TAG, "analyze: onSuccess: $it")
+            }, onFailure = {
+                Log.e(TAG, "analyze: exception: ${it.message}")
+            })
     }
 
     override fun onDestroy() {
