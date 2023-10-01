@@ -14,6 +14,7 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.impl.CameraConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -69,6 +70,7 @@ class CardNumberOcrActivity : ComponentActivity() {
                     CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
                         .build()
                 val preview = Preview.Builder().build().apply {
+                    binding.preview.scaleType = PreviewView.ScaleType.FIT_CENTER
                     setSurfaceProvider(binding.preview.surfaceProvider)
                 }
                 imageAnalysis = ImageAnalysis.Builder()
@@ -112,6 +114,8 @@ class CardNumberOcrActivity : ComponentActivity() {
         extractDataUseCase.process(imageProxy,
             onSuccess = {
                 Log.i(TAG, "analyze: onSuccess: $it")
+                val cardDetail = Extraction.invoke(it)
+                Log.i(TAG, "analyze: cardDetails: $cardDetail")
             }, onFailure = {
                 Log.e(TAG, "analyze: exception: ${it.message}")
             })
