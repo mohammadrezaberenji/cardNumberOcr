@@ -162,6 +162,8 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
         val top: Int
         val bottom: Int
         var diameter: Int
+
+
         diameter = width
 
         if (heigh < width) {
@@ -176,10 +178,12 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
         paint.setStyle(Paint.Style.STROKE)
         paint.setColor(color)
         paint.setStrokeWidth(5F)
+
         left = width / 2 - diameter / 3
         top = heigh / 2 - diameter / 3
         right = width / 2 + diameter / 3
         bottom = heigh / 2 + diameter / 3
+
         val xOffset = left
         val Offset = top
 
@@ -187,7 +191,7 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
         boxWidth = right - left
 
         //Changing the value of x in diameter/x will change the size of the box ; inversely proportionate to x
-        canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+        canvas.drawRect(0F, top.toFloat(),width.toFloat(), bottom.toFloat(), paint)
         holder.unlockCanvasAndPost(canvas)
     }
 

@@ -49,6 +49,14 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
         val offset = (0.05 * diameter)
         diameter -= offset.toInt()
 
+        Log.i(TAG, "process: height : $height")
+        Log.i(TAG, "process: width : $width")
+        Log.i(TAG, "process: diameter : $diameter")
+
+        if (height < width) {
+            diameter = height
+        }
+
 
 
         left = width / 2 - diameter / 3;
