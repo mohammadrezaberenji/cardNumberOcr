@@ -3,8 +3,8 @@ package com.example.cardnumberocr.ui
 import android.util.Log
 import androidx.core.text.isDigitsOnly
 
-object Extraction {
-    private const val TAG = "Extraction"
+class Extraction {
+    private val TAG = "Extraction"
     var valueList = mutableListOf<String>()
 
     private var cardNumber = ""
@@ -22,8 +22,11 @@ object Extraction {
         val extractCvv2 = extractCvv2()
         val extractNumbers = extractNumbers()
 
-        if (extractExpirationDate.isNotEmpty())
-            cardDetail.expirationDate = extractExpirationDate
+        if (extractExpirationDate.first.isNotEmpty())
+            cardDetail.expireYear = extractExpirationDate.first
+
+        if (extractExpirationDate.second.isNotEmpty())
+            cardDetail.expireMonth = extractExpirationDate.second
 
         if (extractCvv2.isNotEmpty())
             cardDetail.cvv2 = extractCvv2
@@ -80,7 +83,7 @@ object Extraction {
         }
     }
 
-    private fun extractExpirationDate(): String {
+    private fun extractExpirationDate(): Pair<String, String> { // year , month
         return try {
             val target = valueList.find {
                 it.contains("/")
@@ -108,10 +111,10 @@ object Extraction {
             Log.i(TAG, "extractExpirationDate: year: $year month: $month")
 
             valueList.remove(target)
-            "$year/$month"
+            Pair(year, month)
         } catch (e: Exception) {
             e.printStackTrace()
-            ""
+            Pair("", "")
         }
     }
 }

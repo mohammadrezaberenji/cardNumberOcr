@@ -5,15 +5,15 @@ import android.util.Log
 data class CardDetail(
     var cardNumber: String = "",
     var cvv2: String = "",
-    var expirationDate: String = "",
+    var expireMonth :String= "",
+    var expireYear :String= "",
     var cardColor: String = ""
 ) {
-    fun isValidFormat():Boolean {
-        Log.i("TAG", "isValidFormat: cardNumber: $cardNumber cvv2: $cvv2 expiry: $expirationDate")
-        return expirationDate.isNotEmpty()
-                && cvv2.isNotEmpty()
-                && cardNumber.isNotEmpty()
-
+    fun concatExpireData():String{
+        return if (expireMonth.isNotEmpty() && expireYear.isNotEmpty())
+            "$expireYear/$expireMonth"
+        else
+            ""
     }
 }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -15,6 +16,41 @@
         app:layout_constraintTop_toTopOf="parent"
         app:cardBackgroundColor="@android:color/holo_green_light">
 
+        <RelativeLayout
+            android:padding="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/card_number_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="6104   3376   9018   6364"
+                android:layout_centerInParent="true"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/expire_date_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true"
+                tools:text="92 / 02"
+                android:textStyle="bold"
+                android:textSize="18dp"/>
+
+            <TextView
+                android:id="@+id/cvv2_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                tools:text="CVV2: 4570"
+                android:textStyle="bold"
+                android:textSize="18dp"/>
+
+        </RelativeLayout>
 
     </com.google.android.material.card.MaterialCardView>
 

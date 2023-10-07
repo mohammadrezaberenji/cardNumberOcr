@@ -21,9 +21,7 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
     }
     var latestCardDetail = CardDetail()
     var getLatestCardDetail: ((CardDetail) -> Unit)? =null
-    init {
-        process()
-    }
+    private var extraction:Extraction?=null
 
     private fun process() {
         Log.i(TAG, "process: ")
@@ -45,7 +43,7 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
         extractDataUseCase.process(imageProxy,
             onSuccess = {
                 Log.i(TAG, "analyze: onSuccess: $it")
-                val cardDetail = Extraction.invoke(it.extractData)
+                val cardDetail = extraction?.invoke(it.extractData)
                 cardDetail?.cardColor = it.cardColor
 
                 if (latestCardDetail.cardNumber.isEmpty())
@@ -54,8 +52,11 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
                 if (latestCardDetail.cvv2.isEmpty())
                     latestCardDetail.cvv2 = cardDetail?.cvv2?:""
 
-                if (latestCardDetail.expirationDate.isEmpty())
-                    latestCardDetail.expirationDate = cardDetail?.expirationDate?:""
+                if (latestCardDetail.expireMonth.isEmpty())
+                    latestCardDetail.expireMonth = cardDetail?.expireMonth?:""
+
+                if (latestCardDetail.expireYear.isEmpty())
+                    latestCardDetail.expireYear = cardDetail?.expireYear?:""
 
                 latestCardDetail.cardColor = cardDetail?.cardColor?:""
 
@@ -69,6 +70,15 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
         Log.i(TAG, "cancelAnalyzing: ")
         imageAnalysis?.clearAnalyzer()
         getLatestCardDetail?.invoke(latestCardDetail)
+        latestCardDetail = CardDetail()
+        extraction = null
+
+    }
+
+    fun startAnalyze(){
+        Log.i(TAG, "startAnalyze: ")
+        extraction = Extraction()
+        process()
     }
 
     fun getLatestCardDetail(cardDetail: (CardDetail)->Unit){

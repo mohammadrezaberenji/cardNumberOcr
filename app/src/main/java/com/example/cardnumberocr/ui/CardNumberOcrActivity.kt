@@ -11,32 +11,24 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
 import android.view.SurfaceHolder
-import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ReportFragment.Companion.reportFragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
-import com.example.cardnumberocr.databinding.BottomSheetCardBinding
+import com.example.cardnumberocr.ui.bottomSheet.AnalyzeCallBack
 import com.example.cardnumberocr.ui.bottomSheet.CardBottomSheet
 import com.example.cardnumberocr.ui.process.ExecutionManager
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executors
 
 
 @ExperimentalGetImage
@@ -51,6 +43,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private lateinit var mCameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private var camera: Camera? = null
     private var imageAnalysis: ImageAnalysis? = null
+    private var executionManager: ExecutionManager? = null
     var boxWidth = 0
     var boxHeight = 0
 
@@ -93,25 +86,19 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
-            val executionManager = ExecutionManager(imageAnalysis,this)
-            executionManager.getLatestCardDetail = {
+            executionManager = ExecutionManager(imageAnalysis, this)
+            executionManager?.startAnalyze()
+            executionManager?.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
                 showCardBottomSheet(it)
             }
 
-//            imageAnalysis?.setAnalyzer(Executors.newSingleThreadExecutor()) {
-//                analyze(it)
-//            }
+            cancelAnalyze()
 
-            lifecycleScope.launch {
-                delay(6000)
-                executionManager.cancelAnalyzing()
+            if (camera != null) {
+                Log.d(TAG, "initView: camera is null then going to unbind")
+                cameraProviderFuture.get().unbindAll()
             }
-
-                if (camera != null) {
-                    Log.d(TAG, "initView: camera is null then going to unbind")
-                    cameraProviderFuture.get().unbindAll()
-                }
 
             camera = cameraProviderFuture.get()
                 .bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
@@ -120,14 +107,36 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     }
 
+    private fun cancelAnalyze() {
+        Log.i(TAG, "cancelAnalyze: ")
+        lifecycleScope.launch {
+            delay(6000)
+            ensureActive()
+            executionManager?.cancelAnalyzing()
+        }
+    }
+
     private fun showCardBottomSheet(cardDetail: CardDetail) {
         Log.i(TAG, "showCardBottomSheet: cardDetail: $cardDetail")
-        val cardBSH = CardBottomSheet(cardDetail = cardDetail,cardColor = cardDetail.cardColor)
-        cardBSH.show(supportFragmentManager,CardBottomSheet::class.java.simpleName)
+        val cardBSH = CardBottomSheet(cardDetail = cardDetail, cardColor = cardDetail.cardColor)
+        cardBSH.show(supportFragmentManager, CardBottomSheet::class.java.simpleName)
+
+        cardBSH.analyzeCallBack = object : AnalyzeCallBack {
+            override fun tryAgain() {
+                Log.i(TAG, "tryAgain: ")
+                executionManager?.startAnalyze()
+                cancelAnalyze()
+
+            }
+
+            override fun complete(cardDetail: CardDetail) {
+                Log.i(TAG, "complete: cardDetail: $cardDetail")
+            }
+        }
     }
 
 
-    private fun checkCameraPermission(/*execute: () -> Unit*/) {
+    private fun checkCameraPermission() {
         val havePermission = ContextCompat.checkSelfPermission(
             this, Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
@@ -149,7 +158,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         Log.i(TAG, "initSurfaceView: ")
         val surfaceView = binding.overLay
         surfaceView.setZOrderOnTop(true);
-        val holder = surfaceView.getHolder();
+        val holder = surfaceView.holder;
         holder.setFormat(PixelFormat.TRANSPARENT);
         holder.addCallback(this)
 
@@ -160,8 +169,8 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         Log.i(TAG, "drawFocusRect: ")
         val displaymetrics = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(displaymetrics)
-        val heigh = binding.preview.getHeight()
-        val width = binding.preview.getWidth()
+        val heigh = binding.preview.height
+        val width = binding.preview.width
         val cameraHeight = heigh
         val cameraWidth = width
 

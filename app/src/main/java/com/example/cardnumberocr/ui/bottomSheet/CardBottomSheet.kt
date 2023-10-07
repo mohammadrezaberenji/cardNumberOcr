@@ -23,6 +23,8 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 
     constructor() : this(null, null) {}
 
+    var analyzeCallBack: AnalyzeCallBack? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogStyle)
@@ -30,7 +32,6 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         Log.i(TAG, "onCreateDialog: ")
-//        this.isCancelable = false
         val bottomSheetDialog: BottomSheetDialog =
             super.onCreateDialog(savedInstanceState) as BottomSheetDialog
         bottomSheetDialog.setOnShowListener {
@@ -39,27 +40,19 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
             if (frameLayout != null) {
                 val bottomSheetBehavior = BottomSheetBehavior.from(frameLayout)
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-
                 bottomSheetBehavior.addBottomSheetCallback(object :
                     BottomSheetBehavior.BottomSheetCallback() {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         Log.i(TAG, "onStateChanged: on state change : $newState")
-
-
                         if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                             val behevior = BottomSheetBehavior.from(bottomSheet)
                             behevior.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
-
                     }
-
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
                         Log.i(TAG, "onSlide: ")
                     }
                 })
-
-//                val peekHeightInPixels = 2000
-//                bottomSheetDialog.behavior.peekHeight = peekHeightInPixels
             }
         }
 
@@ -83,8 +76,27 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 
     private fun init() {
         Log.i(TAG, "init: ")
-        Log.i(TAG, "init: cardDetail: $cardDetail")
+        Log.i(TAG, "init: cardDetail: $cardDetail cardColor: $cardColor")
         if (!cardColor.isNullOrEmpty())
             binding.card.setCardBackgroundColor(Color.parseColor(cardColor))
+
+        binding.cardNumberTv.text = cardDetail?.cardNumber
+        binding.expireDateTv.text = cardDetail?.concatExpireData()
+        binding.cvv2Tv.text = cardDetail?.cvv2
+
+        binding.tryAgainBtn.setOnClickListener {
+            dismiss()
+            analyzeCallBack?.tryAgain()
+        }
+
+        binding.okBtn.setOnClickListener {
+            dismiss()
+            analyzeCallBack?.complete(cardDetail!!)
+        }
     }
+}
+
+interface AnalyzeCallBack {
+    fun tryAgain()
+    fun complete(cardDetail: CardDetail)
 }
