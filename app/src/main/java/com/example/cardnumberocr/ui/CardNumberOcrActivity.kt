@@ -13,6 +13,7 @@ import android.util.Size
 import android.view.SurfaceHolder
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -22,9 +23,13 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
+import com.example.cardnumberocr.databinding.BottomSheetCardBinding
+import com.example.cardnumberocr.ui.bottomSheet.CardBottomSheet
 import com.example.cardnumberocr.ui.process.ExecutionManager
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.text.TextRecognition
@@ -35,7 +40,7 @@ import java.util.concurrent.Executors
 
 
 @ExperimentalGetImage
-class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
+class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     private val TAG = CardNumberOcrActivity::class.java.simpleName
 
@@ -63,7 +68,6 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate: ")
         super.onCreate(savedInstanceState)
-        window
         _binding = ActivityCardNumberOcrBinding.inflate(layoutInflater)
         setContentView(binding.root)
         checkCameraPermission()
@@ -92,6 +96,7 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
             val executionManager = ExecutionManager(imageAnalysis,this)
             executionManager.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
+                showCardBottomSheet(it)
             }
 
 //            imageAnalysis?.setAnalyzer(Executors.newSingleThreadExecutor()) {
@@ -113,6 +118,12 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
 
         }, ContextCompat.getMainExecutor(this))
 
+    }
+
+    private fun showCardBottomSheet(cardDetail: CardDetail) {
+        Log.i(TAG, "showCardBottomSheet: cardDetail: $cardDetail")
+        val cardBSH = CardBottomSheet(cardDetail = cardDetail,cardColor = cardDetail.cardColor)
+        cardBSH.show(supportFragmentManager,CardBottomSheet::class.java.simpleName)
     }
 
 
@@ -205,4 +216,3 @@ class CardNumberOcrActivity : ComponentActivity(), SurfaceHolder.Callback {
     override fun surfaceDestroyed(p0: SurfaceHolder) {
     }
 }
-

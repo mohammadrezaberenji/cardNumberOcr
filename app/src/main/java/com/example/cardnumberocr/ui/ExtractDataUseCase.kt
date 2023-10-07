@@ -18,7 +18,7 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
     private val TAG = "ExtractDataUseCase"
     fun process(
         imageProxy: ImageProxy,
-        onSuccess: (String) -> Unit,
+        onSuccess: (CardAppearance) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         if (imageProxy.image == null) return
@@ -89,7 +89,7 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
         val blue = Color.blue(pixel)
         val green = Color.green(pixel)
         val hexColor = String.format("#%02x%02x%02x", red, green, blue)
-        Log.d(TAG, "Color: ${hexColor}")
+        Log.d(TAG, "Color: $hexColor")
 
 
         val p = textRecognizer.process(
@@ -99,7 +99,10 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
             )
         )
         p.addOnSuccessListener {
-            onSuccess.invoke(it.text)
+            onSuccess.invoke(CardAppearance(
+                extractData = it.text,
+                cardColor = hexColor
+            ))
         }
         p.addOnFailureListener {
             onFailure.invoke(it)

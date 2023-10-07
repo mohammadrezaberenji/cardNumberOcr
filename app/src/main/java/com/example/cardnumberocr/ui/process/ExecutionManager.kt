@@ -45,7 +45,8 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
         extractDataUseCase.process(imageProxy,
             onSuccess = {
                 Log.i(TAG, "analyze: onSuccess: $it")
-                val cardDetail = Extraction.invoke(it)
+                val cardDetail = Extraction.invoke(it.extractData)
+                cardDetail?.cardColor = it.cardColor
 
                 if (latestCardDetail.cardNumber.isEmpty())
                     latestCardDetail.cardNumber = cardDetail?.cardNumber?:""
@@ -56,6 +57,8 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
                 if (latestCardDetail.expirationDate.isEmpty())
                     latestCardDetail.expirationDate = cardDetail?.expirationDate?:""
 
+                latestCardDetail.cardColor = cardDetail?.cardColor?:""
+
                 Log.i(TAG, "analyze: cardDetails: $cardDetail")
             }, onFailure = {
                 Log.e(TAG, "analyze: exception: ${it.message}")
@@ -65,13 +68,11 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
     fun cancelAnalyzing() {
         Log.i(TAG, "cancelAnalyzing: ")
         imageAnalysis?.clearAnalyzer()
-        if (latestCardDetail!= null)
-            getLatestCardDetail?.invoke(latestCardDetail)
+        getLatestCardDetail?.invoke(latestCardDetail)
     }
 
     fun getLatestCardDetail(cardDetail: (CardDetail)->Unit){
         Log.i(TAG, "getLatestCardDetail: ")
-        if (latestCardDetail!= null)
-            cardDetail.invoke(latestCardDetail)
+        cardDetail.invoke(latestCardDetail)
     }
 }

@@ -47,6 +47,7 @@ android {
 }
 
 dependencies {
+    def material_version = '1.5.0-beta01'
 
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
@@ -61,5 +62,13 @@ dependencies {
     implementation 'androidx.camera:camera-lifecycle:1.4.0-alpha01'
     implementation 'androidx.camera:camera-view:1.4.0-alpha01'
     implementation 'com.google.mlkit:text-recognition:16.0.0'
+
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
+    implementation 'androidx.activity:activity-ktx:1.8.0'
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+
 
 }
