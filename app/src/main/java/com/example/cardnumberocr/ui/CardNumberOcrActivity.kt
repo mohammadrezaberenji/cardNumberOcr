@@ -132,6 +132,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
             override fun complete(cardDetail: CardDetail) {
                 Log.i(TAG, "complete: cardDetail: $cardDetail")
+                finish()
             }
         }
     }

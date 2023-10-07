@@ -16,6 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
+
 class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor: String?) :
     BottomSheetDialogFragment() {
     private val TAG = CardBottomSheet::class.java.simpleName
@@ -49,6 +50,7 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
                             behevior.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
                     }
+
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
                         Log.i(TAG, "onSlide: ")
                     }
@@ -80,7 +82,18 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
         if (!cardColor.isNullOrEmpty())
             binding.card.setCardBackgroundColor(Color.parseColor(cardColor))
 
-        binding.cardNumberTv.text = cardDetail?.cardNumber
+        Log.i(TAG, "init: card color : $cardColor")
+
+        if (!cardColor.isNullOrEmpty()) {
+            Log.i(
+                TAG,
+                "init: color is dark  : ${isBackgroundColourDark(Color.parseColor(cardColor))}"
+            )
+        }
+
+
+        binding.cardNumberTv.text =
+            if (cardDetail?.cardNumber.isNullOrEmpty()) getString(R.string.card_not_found) else cardDetail?.cardNumber
         binding.expireDateTv.text = cardDetail?.concatExpireData()
         binding.cvv2Tv.text = cardDetail?.cvv2
 
@@ -93,6 +106,15 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
             dismiss()
             analyzeCallBack?.complete(cardDetail!!)
         }
+    }
+
+    private fun isBackgroundColourDark(color: Int): Boolean {
+        // if calculation is less than 0.25 , color considered as dark
+        val darkness =
+            1 - 0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color) / 255
+        return darkness >= 0.5
+
+
     }
 }
 

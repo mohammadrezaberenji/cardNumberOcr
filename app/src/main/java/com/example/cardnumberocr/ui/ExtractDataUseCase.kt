@@ -99,6 +99,7 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
             )
         )
         p.addOnSuccessListener {
+            Log.i(TAG, "process: text : ${it.text}")
             onSuccess.invoke(CardAppearance(
                 extractData = it.text,
                 cardColor = hexColor
