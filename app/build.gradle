@@ -52,8 +52,8 @@ android {
 publishing {
     publications {
         release(MavenPublication) {
-            groupId = 'com.github.cardNumberOcr'
-            artifactId = 'demo-simple-android-lib'
+            groupId = 'com.github.cardnumberocr'
+            artifactId = 'cardNumberOcr'
             version = '1.0'
 
             afterEvaluate {
