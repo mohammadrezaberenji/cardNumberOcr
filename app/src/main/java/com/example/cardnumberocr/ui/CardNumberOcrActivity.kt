@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import com.example.cardnumberocr.R
 import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
 import com.example.cardnumberocr.databinding.BottomSheetCardBinding
 import com.example.cardnumberocr.ui.bottomSheet.CardBottomSheet
@@ -93,7 +94,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
-            val executionManager = ExecutionManager(imageAnalysis,this)
+            val executionManager = ExecutionManager(imageAnalysis, this)
             executionManager.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
                 showCardBottomSheet(it)
@@ -108,10 +109,10 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
                 executionManager.cancelAnalyzing()
             }
 
-                if (camera != null) {
-                    Log.d(TAG, "initView: camera is null then going to unbind")
-                    cameraProviderFuture.get().unbindAll()
-                }
+            if (camera != null) {
+                Log.d(TAG, "initView: camera is null then going to unbind")
+                cameraProviderFuture.get().unbindAll()
+            }
 
             camera = cameraProviderFuture.get()
                 .bindToLifecycle(this, cameraSelector, preview, imageAnalysis)
@@ -122,8 +123,8 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     private fun showCardBottomSheet(cardDetail: CardDetail) {
         Log.i(TAG, "showCardBottomSheet: cardDetail: $cardDetail")
-        val cardBSH = CardBottomSheet(cardDetail = cardDetail,cardColor = cardDetail.cardColor)
-        cardBSH.show(supportFragmentManager,CardBottomSheet::class.java.simpleName)
+        val cardBSH = CardBottomSheet(cardDetail = cardDetail, cardColor = cardDetail.cardColor)
+        cardBSH.show(supportFragmentManager, CardBottomSheet::class.java.simpleName)
     }
 
 
@@ -181,12 +182,13 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         val offset = (0.05 * diameter).toInt()
         diameter -= offset
         val canvas = holder.lockCanvas()
-        canvas.drawColor(0, PorterDuff.Mode.CLEAR)
+//        canvas.drawColor(0, PorterDuff.Mode.CLEAR)
+
         //border's properties
         val paint = Paint()
-        paint.setStyle(Paint.Style.STROKE)
-        paint.setColor(color)
-        paint.setStrokeWidth(5F)
+        paint.style = Paint.Style.STROKE
+        paint.color = color
+        paint.strokeWidth = 15F
 
         left = width / 2 - diameter / 3
         top = heigh / 2 - diameter / 3
@@ -199,20 +201,38 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         boxHeight = bottom - top
         boxWidth = right - left
 
+        Log.i(TAG, "drawFocusRect: left : $left")
+        Log.i(TAG, "drawFocusRect: top : $top")
+        Log.i(TAG, "drawFocusRect: right : $right")
+        Log.i(TAG, "drawFocusRect: bottom : $bottom")
+        Log.i(TAG, "drawFocusRect: diameter : $diameter")
+        Log.i(TAG, "drawFocusRect: width : $width")
+        Log.i(TAG, "drawFocusRect: height : $heigh")
+
         //Changing the value of x in diameter/x will change the size of the box ; inversely proportionate to x
         canvas.drawRect(0F, top.toFloat(), width.toFloat(), bottom.toFloat(), paint)
+
+        val newPaint = Paint()
+        newPaint.color = ContextCompat.getColor(this, R.color.black_transparent)
+        canvas.drawRect(0f, 0f, width.toFloat(), top.toFloat(), newPaint)
+        canvas.drawRect(0f, diameter.toFloat() - 2 * offset + diameter / 2 , width.toFloat(), heigh.toFloat(), newPaint)
+
+        Log.i(TAG, "drawFocusRect: diameter + diameter / 2 : ${diameter.toFloat() + diameter / 2 - offset}" )
         holder.unlockCanvasAndPost(canvas)
     }
 
     override fun surfaceCreated(p0: SurfaceHolder) {
+        Log.i(TAG, "surfaceCreated: ")
 
     }
 
     override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+        Log.i(TAG, "surfaceChanged: ")
         drawFocusRect(Color.parseColor("#b3dabb"), p0);
 
     }
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
+        Log.i(TAG, "surfaceDestroyed: ")
     }
 }
