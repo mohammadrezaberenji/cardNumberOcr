@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -84,16 +86,29 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 
         Log.i(TAG, "init: card color : $cardColor")
 
-        if (!cardColor.isNullOrEmpty()) {
-            Log.i(
-                TAG,
-                "init: color is dark  : ${isBackgroundColourDark(Color.parseColor(cardColor))}"
-            )
+        val foregroundColor = getContrastColor(Color.parseColor(cardColor?:""))
+        binding.cardNumberTv.setTextColor(foregroundColor)
+        binding.expireDateTv.setTextColor(foregroundColor)
+        binding.cvv2Tv.setTextColor(foregroundColor)
+
+        if (!cardColor.isNullOrEmpty())
+            Log.i(TAG, "init: color is dark  : ${isBackgroundColourDark(Color.parseColor(cardColor))}")
+
+
+        val cardStringBuilder = StringBuilder("")
+        val cardNumber = cardDetail?.cardNumber?:""
+
+        if (cardNumber.isNotEmpty()) {
+            cardNumber.forEachIndexed { index, char ->
+                if (index != 0 && index % 4 == 0)
+                    cardStringBuilder.append("  $char")
+                else
+                    cardStringBuilder.append("$char")
+            }
         }
 
-
         binding.cardNumberTv.text =
-            if (cardDetail?.cardNumber.isNullOrEmpty()) getString(R.string.card_not_found) else cardDetail?.cardNumber
+            if (cardDetail?.cardNumber.isNullOrEmpty()) getString(R.string.card_not_found) else cardStringBuilder.toString()
         binding.expireDateTv.text = cardDetail?.concatExpireData()
         binding.cvv2Tv.text = cardDetail?.cvv2
 
@@ -121,4 +136,29 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 interface AnalyzeCallBack {
     fun tryAgain()
     fun complete(cardDetail: CardDetail)
+}
+
+
+fun isBrightColor(color: Int): Boolean {
+    if (android.R.color.transparent == color) return true
+    var rtnValue = false
+    val rgb = intArrayOf(Color.red(color), Color.green(color), Color.blue(color))
+    val brightness = Math.sqrt(
+        rgb[0] * rgb[0] * .241 + (rgb[1]
+                * rgb[1] * .691) + rgb[2] * rgb[2] * .068
+    ).toInt()
+
+    // color is light
+    if (brightness >= 200) {
+        rtnValue = true
+    }
+    return rtnValue
+}
+
+@ColorInt
+fun getContrastColor(@ColorInt color: Int): Int {
+    val whiteContrast = ColorUtils.calculateContrast(Color.WHITE, color)
+    val blackContrast = ColorUtils.calculateContrast(Color.BLACK, color)
+
+    return if (whiteContrast > blackContrast) Color.WHITE else Color.BLACK
 }

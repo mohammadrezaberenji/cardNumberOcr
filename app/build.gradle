@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android-extensions'
 }
 
 android {
@@ -11,13 +12,17 @@ android {
         applicationId "com.example.cardnumberocr"
         minSdk 24
         targetSdk 34
-        versionCode 110
-        versionName "1.1.0"
+        versionCode 111
+        versionName "1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
+    }
+
+    androidExtensions {
+        experimental = true
     }
 
     buildTypes {
@@ -66,7 +71,7 @@ dependencies {
     implementation 'androidx.camera:camera-view:1.4.0-alpha01'
     implementation 'com.google.mlkit:text-recognition:16.0.0'
 
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
     implementation 'androidx.activity:activity-ktx:1.8.0'
 

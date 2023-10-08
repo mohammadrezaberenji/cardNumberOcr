@@ -1,6 +1,8 @@
 package com.tools.cardnumberocr
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Paint
@@ -11,7 +13,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
 import android.view.SurfaceHolder
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.registerForActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -131,6 +136,9 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
             override fun complete(cardDetail: CardDetail) {
                 Log.i(TAG, "complete: cardDetail: $cardDetail")
+                val data = Intent()
+                data.putExtra(CARD_DETAILS_KEY,cardDetail)
+                setResult(Activity.RESULT_OK,data)
                 finish()
             }
         }
@@ -243,5 +251,11 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     override fun surfaceDestroyed(p0: SurfaceHolder) {
         Log.i(TAG, "surfaceDestroyed: ")
+    }
+
+    companion object {
+        fun startAnalyze(activity :Activity,activityResultLauncher: ActivityResultLauncher<Intent>){
+            activityResultLauncher.launch(Intent(activity,CardNumberOcrActivity::class.java))
+        }
     }
 }

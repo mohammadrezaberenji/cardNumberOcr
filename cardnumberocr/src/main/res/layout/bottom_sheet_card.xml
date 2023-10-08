@@ -25,10 +25,10 @@
                 android:id="@+id/card_number_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="6104   3376   9018   6364"
                 android:layout_centerInParent="true"
                 android:textSize="24sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                tools:text="6104   3376   9018   6364" />
 
             <TextView
                 android:id="@+id/expire_date_tv"

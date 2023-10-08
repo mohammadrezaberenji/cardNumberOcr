@@ -2,11 +2,16 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
+    id 'kotlin-android-extensions'
 }
 
 android {
     namespace 'com.tools.cardnumberocr'
     compileSdk 33
+
+    androidExtensions {
+        experimental = true
+    }
 
     defaultConfig {
         minSdk 21
@@ -64,7 +69,7 @@ afterEvaluate {
 
                 groupId = 'com.tools.cardnumberocr'
                 artifactId = 'cardNumberOcr'
-                version = '1.0.0'
+                version = '1.1.1'
             }
         }
     }
