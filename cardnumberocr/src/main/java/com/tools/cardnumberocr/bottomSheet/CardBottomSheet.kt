@@ -1,4 +1,4 @@
-package com.example.cardnumberocr.ui.bottomSheet
+package com.tools.cardnumberocr.bottomSheet
 
 import android.app.Dialog
 import android.graphics.Color
@@ -9,12 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
-import com.example.cardnumberocr.R
-import com.example.cardnumberocr.databinding.BottomSheetCardBinding
-import com.example.cardnumberocr.ui.CardDetail
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.tools.cardnumberocr.CardDetail
+import com.tools.cardnumberocr.R
+import com.tools.cardnumberocr.databinding.BottomSheetCardBinding
 
 
 class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor: String?) :

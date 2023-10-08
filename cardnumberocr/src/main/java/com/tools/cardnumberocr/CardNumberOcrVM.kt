@@ -1,4 +1,4 @@
-package com.example.cardnumberocr.ui
+package com.tools.cardnumberocr
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow

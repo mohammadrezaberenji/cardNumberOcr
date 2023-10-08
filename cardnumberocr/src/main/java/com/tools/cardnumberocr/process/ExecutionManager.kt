@@ -1,15 +1,15 @@
-package com.example.cardnumberocr.ui.process
+package com.tools.cardnumberocr.process
 
 import android.content.Context
 import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import com.example.cardnumberocr.ui.CardDetail
-import com.example.cardnumberocr.ui.ExtractDataUseCase
-import com.example.cardnumberocr.ui.Extraction
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.tools.cardnumberocr.CardDetail
+import com.tools.cardnumberocr.ExtractDataUseCase
+import com.tools.cardnumberocr.Extraction
 import java.util.concurrent.Executors
 
 @ExperimentalGetImage
@@ -21,7 +21,7 @@ class ExecutionManager(private val imageAnalysis: ImageAnalysis?,private val con
     }
     var latestCardDetail = CardDetail()
     var getLatestCardDetail: ((CardDetail) -> Unit)? =null
-    private var extraction:Extraction?=null
+    private var extraction: Extraction?=null
 
     private fun process() {
         Log.i(TAG, "process: ")

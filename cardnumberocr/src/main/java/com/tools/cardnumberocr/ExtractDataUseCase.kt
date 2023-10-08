@@ -1,4 +1,4 @@
-package com.example.cardnumberocr.ui
+package com.tools.cardnumberocr
 
 import android.util.Log
 import android.content.Context

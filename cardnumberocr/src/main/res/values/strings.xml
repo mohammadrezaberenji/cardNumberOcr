@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">CardNumberOcr</string>
+    <string name="try_again">try again</string>
+    <string name="card_not_found">card number not found , try again.</string>
+    <string name="ok">ok</string>
+</resources>

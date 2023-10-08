@@ -1,4 +1,4 @@
-package com.example.cardnumberocr.ui
+package com.tools.cardnumberocr
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -21,12 +21,11 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.cardnumberocr.R
-import com.example.cardnumberocr.databinding.ActivityCardNumberOcrBinding
-import com.example.cardnumberocr.ui.bottomSheet.AnalyzeCallBack
-import com.example.cardnumberocr.ui.bottomSheet.CardBottomSheet
-import com.example.cardnumberocr.ui.process.ExecutionManager
 import com.google.common.util.concurrent.ListenableFuture
+import com.tools.cardnumberocr.bottomSheet.AnalyzeCallBack
+import com.tools.cardnumberocr.bottomSheet.CardBottomSheet
+import com.tools.cardnumberocr.databinding.ActivityCardNumberOcrBinding
+import com.tools.cardnumberocr.process.ExecutionManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
