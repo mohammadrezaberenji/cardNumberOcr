@@ -1,7 +1,7 @@
 plugins {
-    id 'com.android.library'
+    id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'maven-publish'
+    id 'kotlin-android-extensions'
 }
 
 android {
@@ -9,11 +9,11 @@ android {
     compileSdk 34
 
     defaultConfig {
-//        applicationId "com.example.cardnumberocr"
+        applicationId "com.example.cardnumberocr"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 111
+        versionName "1.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -21,10 +21,14 @@ android {
         }
     }
 
+    androidExtensions {
+        experimental = true
+    }
+
     buildTypes {
         release {
             minifyEnabled true
-//            shrinkResources true
+            shrinkResources true
 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -49,24 +53,8 @@ android {
     }
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'com.github.cardnumberocr'
-            artifactId = 'cardNumberOcr'
-            version = '1.0'
-
-            afterEvaluate {
-                from components.release
-            }
-        }
-    }
-}
-
-
-
-
 dependencies {
+    implementation project(path: ':cardnumberocr')
     def material_version = '1.5.0-beta01'
 
     implementation 'androidx.core:core-ktx:1.12.0'
@@ -83,12 +71,8 @@ dependencies {
     implementation 'androidx.camera:camera-view:1.4.0-alpha01'
     implementation 'com.google.mlkit:text-recognition:16.0.0'
 
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.fragment:fragment-ktx:1.6.1'
     implementation 'androidx.activity:activity-ktx:1.8.0'
-
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-
-
 
 }
