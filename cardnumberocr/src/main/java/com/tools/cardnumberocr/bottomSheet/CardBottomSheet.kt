@@ -100,7 +100,7 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
             val foregroundColor = getContrastColor(Color.parseColor(cardColor?:""))
             binding.cardNumberTv.setTextColor(foregroundColor)
             binding.expireDateTv.setTextColor(foregroundColor)
-            binding.cvv2Tv.setTextColor(foregroundColor)\
+            binding.cvv2Tv.setTextColor(foregroundColor)
         }
 
         if (!cardColor.isNullOrEmpty())
