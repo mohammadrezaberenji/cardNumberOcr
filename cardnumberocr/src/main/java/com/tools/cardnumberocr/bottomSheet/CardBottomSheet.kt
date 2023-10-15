@@ -33,6 +33,16 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
         setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogStyle)
     }
 
+    /** prevent touch outside of bottomSheet **/
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onActivityCreated: ")
+        super.onActivityCreated(savedInstanceState)
+        val touchOutsideView = dialog!!.window!!.decorView.findViewById<View>(com.google.android.material.R.id.touch_outside)
+        touchOutsideView.setOnClickListener(null)
+
+
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         Log.i(TAG, "onCreateDialog: ")
         val bottomSheetDialog: BottomSheetDialog =
@@ -86,10 +96,12 @@ class CardBottomSheet(private val cardDetail: CardDetail?, private val cardColor
 
         Log.i(TAG, "init: card color : $cardColor")
 
-        val foregroundColor = getContrastColor(Color.parseColor(cardColor?:""))
-        binding.cardNumberTv.setTextColor(foregroundColor)
-        binding.expireDateTv.setTextColor(foregroundColor)
-        binding.cvv2Tv.setTextColor(foregroundColor)
+        if (!cardColor.isNullOrEmpty()){
+            val foregroundColor = getContrastColor(Color.parseColor(cardColor?:""))
+            binding.cardNumberTv.setTextColor(foregroundColor)
+            binding.expireDateTv.setTextColor(foregroundColor)
+            binding.cvv2Tv.setTextColor(foregroundColor)\
+        }
 
         if (!cardColor.isNullOrEmpty())
             Log.i(TAG, "init: color is dark  : ${isBackgroundColourDark(Color.parseColor(cardColor))}")

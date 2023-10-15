@@ -2,6 +2,7 @@ package com.tools.cardnumberocr
 
 import android.Manifest
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -95,7 +96,13 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
             executionManager?.startAnalyze()
             executionManager?.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
-                showCardBottomSheet(it)
+                if (it.cardNumber.isNotEmpty() )
+                    showCardBottomSheet(it)
+                else{
+                    Log.i(TAG, "prepareCameraConfig: it was not successful to get card number ")
+
+                }
+
             }
 
             cancelAnalyze()
@@ -115,9 +122,9 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private fun cancelAnalyze() {
         Log.i(TAG, "cancelAnalyze: ")
         lifecycleScope.launch {
-            delay(6000)
-            ensureActive()
-            executionManager?.cancelAnalyzing()
+//            delay(10_000)
+//            ensureActive()
+//            executionManager?.cancelAnalyzing()
         }
     }
 
@@ -137,8 +144,8 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
             override fun complete(cardDetail: CardDetail) {
                 Log.i(TAG, "complete: cardDetail: $cardDetail")
                 val data = Intent()
-                data.putExtra(CARD_DETAILS_KEY,cardDetail)
-                setResult(Activity.RESULT_OK,data)
+                data.putExtra(CARD_DETAILS_KEY, cardDetail)
+                setResult(Activity.RESULT_OK, data)
                 finish()
             }
         }
@@ -232,9 +239,18 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         val newPaint = Paint()
         newPaint.color = ContextCompat.getColor(this, R.color.black_transparent)
         canvas.drawRect(0f, 0f, width.toFloat(), top.toFloat(), newPaint)
-        canvas.drawRect(0f, diameter.toFloat() - 2 * offset + diameter / 2 , width.toFloat(), heigh.toFloat(), newPaint)
+        canvas.drawRect(
+            0f,
+            diameter.toFloat() - 2 * offset + diameter / 2,
+            width.toFloat(),
+            heigh.toFloat(),
+            newPaint
+        )
 
-        Log.i(TAG, "drawFocusRect: diameter + diameter / 2 : ${diameter.toFloat() + diameter / 2 - offset}" )
+        Log.i(
+            TAG,
+            "drawFocusRect: diameter + diameter / 2 : ${diameter.toFloat() + diameter / 2 - offset}"
+        )
         holder.unlockCanvasAndPost(canvas)
     }
 
@@ -254,8 +270,12 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     companion object {
-        fun startAnalyze(activity :Activity,activityResultLauncher: ActivityResultLauncher<Intent>){
-            activityResultLauncher.launch(Intent(activity,CardNumberOcrActivity::class.java))
+        fun startAnalyze(
+            activity: Activity,
+            activityResultLauncher: ActivityResultLauncher<Intent>
+        ) {
+            activityResultLauncher.launch(Intent(activity, CardNumberOcrActivity::class.java))
+            activity.finish()
         }
     }
 }
