@@ -24,6 +24,8 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -52,7 +54,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
     private var executionManager: ExecutionManager? = null
     var boxWidth = 0
     var boxHeight = 0
-
+    var showResultBottomSheet = false
 
     private var requestCameraPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -69,9 +71,15 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
         super.onCreate(savedInstanceState)
         _binding = ActivityCardNumberOcrBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        getRequiredDataFromBundle()
         checkCameraPermission()
         prepareCameraConfig()
         initSurfaceView()
+    }
+
+    private fun getRequiredDataFromBundle() {
+        Log.i(TAG, "getRequiredDataFromBundle: ")
+        showResultBottomSheet = intent.getBooleanExtra(SHOW_BOTTOM_SHEET,true)
     }
 
     private fun prepareCameraConfig() {
@@ -88,7 +96,12 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
             }
 
             imageAnalysis = ImageAnalysis.Builder()
-                .setTargetResolution(Size(720, 1488))
+//                .setResolutionSelector(
+//                    ResolutionSelector.Builder()
+//                        .setAspectRatioStrategy()
+//                        .build()
+//                )
+                .setTargetResolution(Size(window.decorView.measuredWidth, window.decorView.measuredHeight))
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
 
@@ -96,8 +109,15 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
             executionManager?.startAnalyze()
             executionManager?.getLatestCardDetail = {
                 Log.i(TAG, "prepareCameraConfig: callBack cardDetail: $it")
-                if (it.cardNumber.isNotEmpty() )
-                    showCardBottomSheet(it)
+                if (it.cardNumber.isNotEmpty())
+                    if (showResultBottomSheet){
+                        showCardBottomSheet(it)
+                    }else{
+                        val data = Intent()
+                        data.putExtra(CARD_DETAILS_KEY, it)
+                        setResult(Activity.RESULT_OK, data)
+                        finish()
+                    }
                 else{
                     Log.i(TAG, "prepareCameraConfig: it was not successful to get card number ")
 
@@ -238,7 +258,9 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
         val newPaint = Paint()
         newPaint.color = ContextCompat.getColor(this, R.color.black_transparent)
+        // top section
         canvas.drawRect(0f, 0f, width.toFloat(), top.toFloat(), newPaint)
+        // bottom section
         canvas.drawRect(
             0f,
             diameter.toFloat() - 2 * offset + diameter / 2,
@@ -247,10 +269,7 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
             newPaint
         )
 
-        Log.i(
-            TAG,
-            "drawFocusRect: diameter + diameter / 2 : ${diameter.toFloat() + diameter / 2 - offset}"
-        )
+        Log.i(TAG, "drawFocusRect: diameter + diameter / 2 : ${diameter.toFloat() + diameter / 2 - offset}")
         holder.unlockCanvasAndPost(canvas)
     }
 
@@ -270,11 +289,15 @@ class CardNumberOcrActivity : AppCompatActivity(), SurfaceHolder.Callback {
     }
 
     companion object {
+        private const val SHOW_BOTTOM_SHEET = "SHOW_BOTTOM_SHEET"
         fun startAnalyze(
             activity: Activity,
+            showBottomSheet:Boolean = true,
             activityResultLauncher: ActivityResultLauncher<Intent>
         ) {
-            activityResultLauncher.launch(Intent(activity, CardNumberOcrActivity::class.java))
+            val intent = Intent(activity, CardNumberOcrActivity::class.java)
+            intent.putExtra(SHOW_BOTTOM_SHEET,showBottomSheet)
+            activityResultLauncher.launch(intent)
             activity.finish()
         }
     }

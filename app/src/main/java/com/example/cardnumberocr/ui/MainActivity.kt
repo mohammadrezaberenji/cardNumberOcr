@@ -21,6 +21,7 @@ class MainActivity:ComponentActivity() {
 
         CardNumberOcrActivity.startAnalyze(
             activity = this,
+            showBottomSheet = true,
             activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result ->
                 if (result.resultCode == Activity.RESULT_OK){
                     val resultData = result.data?.getParcelableExtra<CardDetail>(CARD_DETAILS_KEY)

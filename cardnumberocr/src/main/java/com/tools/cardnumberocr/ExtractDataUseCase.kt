@@ -79,10 +79,21 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
         Log.i(TAG, "process: box height : ${activity.boxHeight}")
 
 
-        val newBitMap = Bitmap.createBitmap(bimap, left, top, activity.boxWidth, activity.boxHeight)
+        Log.i(TAG, "process: bitmap width: ${bimap.width}")
+        Log.i(TAG, "process: left + boxWidth: ${left + activity.boxWidth}")
+
+        val diff = bimap.width - (left + activity.boxWidth)
+        val realDiff = diff + (left + activity.boxWidth) - 10
+
+        Log.i(TAG, "process: diff: $diff")
+        Log.i(TAG, "process: realDiff: $realDiff")
+
+        val newBitMap = Bitmap.createBitmap(bimap, left, 0, activity.boxWidth, bimap.height)
 
         Log.i(TAG, "process: new bitmap width : ${newBitMap.width}")
         Log.i(TAG, "process: new bitmap height ; ${newBitMap.height}")
+
+        Log.i(TAG, "process: bitmap x: ${bimap}")
 
         val pixel = newBitMap.getPixel((newBitMap.width / 2), 0 )
         val red = Color.red(pixel)
@@ -90,6 +101,7 @@ class ExtractDataUseCase(private val textRecognizer: TextRecognizer, private val
         val green = Color.green(pixel)
         val hexColor = String.format("#%02x%02x%02x", red, green, blue)
         Log.d(TAG, "Color: $hexColor")
+
 
 
         val p = textRecognizer.process(
