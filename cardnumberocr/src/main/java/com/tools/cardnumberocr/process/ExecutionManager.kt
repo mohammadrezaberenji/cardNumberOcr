@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.tools.cardnumberocr.CardDetail
